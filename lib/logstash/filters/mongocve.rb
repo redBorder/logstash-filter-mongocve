@@ -93,11 +93,13 @@ class LogStash::Filters::MongoCVE < LogStash::Filters::Base
   end
 
 
-  # Generate the output event with the CVE info
+  # Generate the output event with the CVE info, without metadata
   def set_output_event(input_event, cve)
     out_event = LogStash::Event.new
     input_event.each { |k, v| out_event.set(k, v) }
     cve.each { |k, v| out_event.set(k, v) }
+    out_event.remove('@timestamp')
+    out_event.remove('@version')
     return out_event
   end
 
