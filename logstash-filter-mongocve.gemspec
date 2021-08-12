@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = 'logstash-filter-mongocve'
-  s.version       = '0.1.0'
+  s.version       = '0.1.1'
   s.licenses      = ['Apache-2.0']
   s.summary       = 'Access to MongoDB dataset.'
   s.description   = 'It implements the MongoDB server access by its client configuration to get the CVE info requested by the Vulnerability Scan module from RedBorder platform.'
