@@ -18,6 +18,7 @@ class LogStash::Filters::MongoCVE < LogStash::Filters::Base
   public
   # As the initialize method, start the MongoDB session --> "register" mandatory for a Logstash filter plugin
   def register
+    #puts "[MongoCVE] REGISTERING...."
     @cpes_availables = Hash.new
     set_db_session
   end
@@ -30,8 +31,9 @@ class LogStash::Filters::MongoCVE < LogStash::Filters::Base
     begin
       @client = Mongo::Client.new([ @connection_string ], :database => @db_name )
       @db = @client.database
+      #puts "[MongoCVE] Database connected"
     rescue e
-      #puts '[open_db_session] Error conecting to ' + @db_name.to_s + ': ' + e.to_s
+      #puts '[MongoCVE][open_db_session] Error conecting to ' + @db_name.to_s + ': ' + e.to_s
     end
   end
 
@@ -49,12 +51,12 @@ class LogStash::Filters::MongoCVE < LogStash::Filters::Base
     input_event = event.to_hash
     input_event.delete('@timestamp')
     input_event.delete('@version')
-    #puts '[filter] input_event: ' + input_event.to_s
-    #puts '[filter] input_event["cpe"]: ' + input_event["cpe"]
+    #puts '[MongoCVE][filter] input_event: ' + input_event.to_s
+    #puts '[MongoCVE][filter] input_event["cpe"]: ' + input_event["cpe"]
     cpe_p_v = get_prod_version(input_event["cpe"])
     # Check if the CPE was already found in a previous execution
     if !@cpes_availables.has_key?( input_event["cpe"] )
-      #puts '[filter] It\'s a new CPE.'
+      #puts '[MongoCVE][filter] It\'s a new CPE.'
       # Create a new list entry to save the new CPE
       @cpes_availables[input_event["cpe"]] = []
       # Check DB session
@@ -77,11 +79,11 @@ class LogStash::Filters::MongoCVE < LogStash::Filters::Base
         output_event = set_output_event(input_event, cve)
         yield output_event
         # Include the output into the saved CVE's events list for the given CPE
-        #puts '[filter] CVE info for the given CPE that will be saved: ' + cve.to_s
+        #puts '[MongoCVE][filter] CVE info for the given CPE that will be saved: ' + cve.to_s
         @cpes_availables[input_event["cpe"]].push( cve )
       end
     else
-      #puts '[filter] CPE already saved: ' + @cpes_availables[input_event["cpe"]].to_s
+      #puts '[MongoCVE][filter] CPE already saved: ' + @cpes_availables[input_event["cpe"]].to_s
       @cpes_availables[input_event["cpe"]].each do |saved_cve|
         # Generate an output event by every saved CVE for the given CPE
         output_event = set_output_event(input_event, saved_cve)
@@ -150,7 +152,7 @@ class LogStash::Filters::MongoCVE < LogStash::Filters::Base
         end
       end
     end
-    cves.each { |elem| (#puts '[find_cpe] cves: ' + elem.to_s) }
+    #cves.each { |elem| (#puts '[find_cpe] cves: ' + elem.to_s) }
     return cves.uniq
   end
 
@@ -236,7 +238,7 @@ class LogStash::Filters::MongoCVE < LogStash::Filters::Base
     query_one_list = { :'configurations.nodes.cpe_match.cpe23Uri' => /:a:#{cpe_vendor_product}:/ }
     query_several_lists = { :'configurations.nodes.children.cpe_match.cpe23Uri' => /:a:#{cpe_vendor_product}:/ }
     response = @db["#{collection}"].find( { :$or => [ query_one_list , query_several_lists ] } ).to_a
-    #puts '[database] response lenght: ' + response.length().to_s
+    #puts '[MongoCVE][database] response lenght: ' + response.length().to_s
     return response
   end
 
@@ -250,7 +252,7 @@ class LogStash::Filters::MongoCVE < LogStash::Filters::Base
       #puts coll + ' - ' + count.to_s
       num += count
     end
-    #puts '[count_regs] Total documents: ' + num.to_s
+    #puts '[MongoCVE][count_regs] Total documents: ' + num.to_s
   end
 
 
