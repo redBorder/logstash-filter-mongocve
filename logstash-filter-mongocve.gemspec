@@ -18,7 +18,8 @@ Gem::Specification.new do |s|
   s.metadata = { 'logstash_plugin' => 'true', 'logstash_group' => 'filter' }
 
   # Gem dependencies
-  s.add_runtime_dependency 'mongo'
+  s.add_runtime_dependency 'bson', '~> 4.12'
+  s.add_runtime_dependency 'mongo', '~> 2.15'
   s.add_runtime_dependency 'logstash-core-plugin-api', '~> 2.0'
   s.add_development_dependency 'logstash-devutils', '~> 1.3', '>= 1.3.6'
 end
